@@ -188,277 +188,343 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-16">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Success/Error Message */}
-        {message && (
-          <div className={`mb-8 p-6 rounded-lg border-2 ${
-            message.includes("success") || message.includes("email")
-              ? "bg-green-500/20 text-green-800 border-green-500"
-              : "bg-red-500/20 text-red-800 border-red-500"
-          }`}>
-            <div className="flex items-start">
-              <svg className={`w-6 h-6 mr-3 flex-shrink-0 ${
-                message.includes("success") ? "text-green-600" : "text-red-600"
-              }`} fill="currentColor" viewBox="0 0 20 20">
-                {message.includes("success") ? (
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                ) : (
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                )}
-              </svg>
-              <div>
-                <p className="font-semibold">{message}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-2 bg-primary-700/10 text-primary-700 rounded-full text-sm font-semibold mb-4">
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative bg-gray-900 text-white py-24 md:py-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(251,191,36,0.3),transparent_50%)] animate-pulse"></div>
+        </div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-sm tracking-[0.3em] uppercase text-gray-400 mb-6 font-light">
             Reserve Your Spot
-          </span>
-          <h1 className="text-4xl md:text-5xl font-bold text-primary-700 mb-4">
-            Book Your Service
+          </p>
+          <h1 className="text-5xl md:text-7xl font-light mb-8 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
+            Book Your <em className="text-amber-400">Service</em>
           </h1>
-          <p className="text-xl text-primary-700/80 max-w-2xl mx-auto">
+          <div className="w-20 h-px bg-gray-600 mx-auto mb-8"></div>
+          <p className="text-xl md:text-2xl text-gray-300 max-w-2xl mx-auto font-light">
             Schedule your appointment in just a few clicks
           </p>
         </div>
+      </section>
 
-        <div className="bg-background-light rounded-lg shadow-xl p-8 border border-primary-700/20">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
-                  placeholder="John Doe"
-                />
+      {/* Booking Form Section */}
+      <section className="py-24 md:py-32">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Success/Error Message */}
+          {message && (
+            <div className={`mb-12 p-8 border-l-4 shadow-lg animate-fade-in-up ${
+              message.includes("success") || message.includes("email")
+                ? "bg-green-50 border-green-500"
+                : "bg-red-50 border-red-500"
+            }`}>
+              <div className="flex items-start">
+                <div className={`flex-shrink-0 ${
+                  message.includes("success") ? "text-green-600" : "text-red-600"
+                }`}>
+                  {message.includes("success") ? (
+                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </div>
+                <div className="ml-4 flex-1">
+                  <p className={`text-lg font-light leading-relaxed ${
+                    message.includes("success") ? "text-green-800" : "text-red-800"
+                  }`}>
+                    {message}
+                  </p>
+                </div>
               </div>
+            </div>
+          )}
 
+          {/* Booking Form Card */}
+          <div className="bg-gray-900 p-10 md:p-14 shadow-2xl">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              
+              {/* Personal Information */}
               <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Phone Number *
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    name="countryCode"
-                    value={formData.countryCode}
-                    onChange={handleChange}
-                    className="w-32 px-3 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
-                  >
-                    {countryCodes.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.flag} {country.code}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="flex-1">
+                <h3 className="text-2xl font-light text-white mb-8 pb-4 border-b border-gray-200" style={{ fontFamily: 'Georgia, serif' }}>
+                  Personal Information
+                </h3>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div>
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Full Name *
+                    </label>
                     <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handlePhoneChange}
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                       required
-                      maxLength="10"
-                      pattern="\d{10}"
-                      className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-accent-500 bg-background text-primary-700 transition ${
-                        phoneError
-                          ? "border-red-500 focus:border-red-500"
-                          : "border-primary-700/20 focus:border-accent-500"
-                      }`}
-                      placeholder="9876543210"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none"
+                      placeholder="John Doe"
                     />
-                    {phoneError && (
-                      <p className="text-red-600 text-sm mt-1 flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none"
+                      placeholder="john@example.com"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Phone Number *
+                    </label>
+                    <div className="flex gap-3">
+                      <select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={handleChange}
+                        className="w-36 px-4 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                      >
+                        {countryCodes.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.flag} {country.code}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex-1">
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handlePhoneChange}
+                          required
+                          maxLength="10"
+                          pattern="\d{10}"
+                          className={`w-full px-5 py-4 border-2 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none ${
+                            phoneError
+                              ? "border-red-500 focus:border-red-500"
+                              : "border-gray-300 focus:border-gray-900"
+                          }`}
+                          placeholder="9876543210"
+                        />
+                        {phoneError && (
+                          <p className="text-red-600 text-sm mt-2 flex items-center font-light">
+                            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            {phoneError}
+                          </p>
+                        )}
+                        {formData.phone && !phoneError && formData.phone.length === 10 && (
+                          <p className="text-green-600 text-sm mt-2 flex items-center font-light">
+                            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Valid phone number
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2 font-light">
+                      Enter 10-digit mobile number (numbers only)
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Service Details */}
+              <div>
+                <h3 className="text-2xl font-light text-white mb-8 pb-4 border-b border-gray-200" style={{ fontFamily: 'Georgia, serif' }}>
+                  Service Details
+                </h3>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div>
+                    <label className="block text-sm font-light text-lg text-white mb-3 tracking-wide uppercase">
+                      Select Service *
+                    </label>
+                    <select
+                      name="service"
+                      value={formData.service}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">Choose a service</option>
+                      {services.map((service) => (
+                        <option key={service._id} value={service.slug}>
+                          {service.name} - ₹{service.price}
+                        </option>
+                      ))}
+                    </select>
+                    {services.length === 0 && (
+                      <p className="text-sm text-red-600 mt-2 flex items-center font-light">
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        {phoneError}
+                        No services available. Admin must add services first.
                       </p>
                     )}
-                    {formData.phone && !phoneError && formData.phone.length === 10 && (
-                      <p className="text-green-600 text-sm mt-1 flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Vehicle Type *
+                    </label>
+                    <select
+                      name="vehicleType"
+                      value={formData.vehicleType}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">Select vehicle type</option>
+                      {vehicleTypes.map((vehicle) => (
+                        <option key={vehicle._id} value={vehicle.slug}>
+                          {vehicle.name}
+                        </option>
+                      ))}
+                    </select>
+                    {vehicleTypes.length === 0 && (
+                      <p className="text-sm text-red-600 mt-2 flex items-center font-light">
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        Valid phone number
+                        No vehicle types available. Admin must add vehicle types first.
                       </p>
                     )}
                   </div>
                 </div>
-                <p className="text-xs text-primary-700/60 mt-1">
-                  Enter 10-digit mobile number (numbers only)
-                </p>
               </div>
 
+              {/* Appointment Schedule */}
               <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Service *
-                </label>
-                <select
-                  name="service"
-                  value={formData.service}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
-                >
-                  <option value="">Select a service</option>
-                  {services.map((service) => (
-                    <option key={service._id} value={service.slug}>
-                      {service.name} - ₹{service.price}
-                    </option>
-                  ))}
-                </select>
-                {services.length === 0 && (
-                  <p className="text-sm text-red-600 mt-1 font-medium">
-                    ⚠️ No services available. Admin must add services first.
-                  </p>
-                )}
+                <h3 className="text-2xl font-light text-white mb-8 pb-4 border-b border-gray-200" style={{ fontFamily: 'Georgia, serif' }}>
+                  Appointment Schedule
+                </h3>
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div>
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Preferred Date *
+                    </label>
+                    <input
+                      type="date"
+                      name="bookingDate"
+                      value={formData.bookingDate}
+                      onChange={handleChange}
+                      required
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Preferred Time *
+                    </label>
+                    <select
+                      name="bookingTime"
+                      value={formData.bookingTime}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">Select time slot</option>
+                      <option value="07:00 AM">07:00 AM</option>
+                      <option value="08:00 AM">08:00 AM</option>
+                      <option value="09:00 AM">09:00 AM</option>
+                      <option value="10:00 AM">10:00 AM</option>
+                      <option value="11:00 AM">11:00 AM</option>
+                      <option value="12:00 PM">12:00 PM</option>
+                      <option value="01:00 PM">01:00 PM</option>
+                      <option value="02:00 PM">02:00 PM</option>
+                      <option value="03:00 PM">03:00 PM</option>
+                      <option value="04:00 PM">04:00 PM</option>
+                      <option value="05:00 PM">05:00 PM</option>
+                      <option value="06:00 PM">06:00 PM</option>
+                      <option value="07:00 PM">07:00 PM</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
+              {/* Additional Notes */}
               <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Vehicle Type *
+                <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                  Additional Notes (Optional)
                 </label>
-                <select
-                  name="vehicleType"
-                  value={formData.vehicleType}
+                <textarea
+                  name="notes"
+                  value={formData.notes}
                   onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
-                >
-                  <option value="">Select vehicle type</option>
-                  {vehicleTypes.map((vehicle) => (
-                    <option key={vehicle._id} value={vehicle.slug}>
-                      {vehicle.name}
-                    </option>
-                  ))}
-                </select>
-                {vehicleTypes.length === 0 && (
-                  <p className="text-sm text-red-600 mt-1 font-medium">
-                    ⚠️ No vehicle types available. Admin must add vehicle types first.
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Preferred Date *
-                </label>
-                <input
-                  type="date"
-                  name="bookingDate"
-                  value={formData.bookingDate}
-                  onChange={handleChange}
-                  required
-                  min={new Date().toISOString().split("T")[0]}
-                  className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
+                  rows={5}
+                  className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 resize-none font-light focus:outline-none"
+                  placeholder="Any specific requirements or concerns..."
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-primary-700 mb-2">
-                  Preferred Time *
-                </label>
-                <select
-                  name="bookingTime"
-                  value={formData.bookingTime}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition"
+              {/* Submit Button */}
+              <div className="pt-6">
+                <button
+                  type="submit"
+                  disabled={loading || phoneError || formData.phone.length !== 10 || services.length === 0 || vehicleTypes.length === 0}
+                  className="group relative w-full py-6 border-4 border-green-900 text-white text-center text-md tracking-[0.2em] uppercase font-light overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500"
                 >
-                  <option value="">Select time</option>
-                  <option value="07:00 AM">07:00 AM</option>
-                  <option value="08:00 AM">08:00 AM</option>
-                  <option value="09:00 AM">09:00 AM</option>
-                  <option value="10:00 AM">10:00 AM</option>
-                  <option value="11:00 AM">11:00 AM</option>
-                  <option value="12:00 PM">12:00 PM</option>
-                  <option value="01:00 PM">01:00 PM</option>
-                  <option value="02:00 PM">02:00 PM</option>
-                  <option value="03:00 PM">03:00 PM</option>
-                  <option value="04:00 PM">04:00 PM</option>
-                  <option value="05:00 PM">05:00 PM</option>
-                  <option value="06:00 PM">06:00 PM</option>
-                  <option value="07:00 PM">07:00 PM</option>
-                </select>
+                  <span className="absolute inset-0 bg-gray-900 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></span>
+                  <span className="relative group-hover:text-white transition-colors duration-500 flex items-center justify-center gap-3">
+                    {loading ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Submitting Your Booking...
+                      </>
+                    ) : (
+                      <>
+                        📅 Book Appointment Now
+                        <svg className="w-5 h-5 transform group-hover:translate-x-2 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                      </>
+                    )}
+                  </span>
+                </button>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-primary-700 mb-2">
-                Additional Notes
-              </label>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-3 border-2 border-primary-700/20 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-accent-500 bg-background text-primary-700 transition resize-none"
-                placeholder="Any specific requirements or concerns..."
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || phoneError || formData.phone.length !== 10 || services.length === 0 || vehicleTypes.length === 0}
-              className="w-full bg-primary-700 text-background py-4 rounded-lg font-semibold hover:bg-primary-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105 duration-300 text-lg"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-background" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Submitting...
-                </span>
-              ) : (
-                "Book Now"
-              )}
-            </button>
-          </form>
-        </div>
-
-        {/* Quick Info */}
-        <div className="mt-8 grid md:grid-cols-3 gap-4">
-          <div className="bg-background-light p-4 rounded-lg border border-primary-700/20 text-center">
-            <div className="text-2xl font-bold text-accent-500 mb-1">24/7</div>
-            <div className="text-sm text-primary-700/80">Available</div>
+            </form>
           </div>
-          <div className="bg-background-light p-4 rounded-lg border border-primary-700/20 text-center">
-            <div className="text-2xl font-bold text-accent-500 mb-1">30 Min</div>
-            <div className="text-sm text-primary-700/80">Quick Service</div>
-          </div>
-          <div className="bg-background-light p-4 rounded-lg border border-primary-700/20 text-center">
-            <div className="text-2xl font-bold text-accent-500 mb-1">100%</div>
-            <div className="text-sm text-primary-700/80">Satisfaction</div>
+
+          {/* Quick Info Cards */}
+          <div className="mt-16 grid md:grid-cols-3 gap-8">
+            <div className="bg-gray-900 p-8 text-center group hover:bg-gray-800 transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">⏰</div>
+              <div className="text-4xl font-light text-amber-400 mb-2" style={{ fontFamily: 'Georgia, serif' }}>24/7</div>
+              <div className="text-sm text-gray-300 font-light tracking-wide uppercase">Service Available</div>
+            </div>
+            
+            <div className="bg-gray-900 p-8 text-center group hover:bg-gray-800 transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">⚡</div>
+              <div className="text-4xl font-light text-amber-400 mb-2" style={{ fontFamily: 'Georgia, serif' }}>30 Min</div>
+              <div className="text-sm text-gray-300 font-light tracking-wide uppercase">Quick Service</div>
+            </div>
+            
+            <div className="bg-gray-900 p-8 text-center group hover:bg-gray-800 transition-all duration-300 transform hover:-translate-y-2">
+              <div className="text-5xl mb-4 transform group-hover:scale-110 transition-transform duration-300">✅</div>
+              <div className="text-4xl font-light text-amber-400 mb-2" style={{ fontFamily: 'Georgia, serif' }}>100%</div>
+              <div className="text-sm text-gray-300 font-light tracking-wide uppercase">Satisfaction Guaranteed</div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

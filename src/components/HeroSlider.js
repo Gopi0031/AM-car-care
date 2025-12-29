@@ -107,7 +107,7 @@ export default function HeroSlider() {
           <img
             src={image.secure_url}
             alt={`Premium Car Service ${index + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain sm:object-contain md:object-cover lg:object-cover"
           />
           {/* Gradient Overlays */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent sm:from-black/70 sm:via-black/50" />
@@ -116,7 +116,7 @@ export default function HeroSlider() {
       ))}
 
       {/* Main Content */}
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-[5] h-full flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-3xl">
             {/* Main Heading */}
@@ -181,7 +181,7 @@ export default function HeroSlider() {
 
       {/* Navigation Dots */}
       {images.length > 1 && (
-        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-[8]">
           <div className="bg-black/30 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-3 rounded-full flex items-center space-x-2 sm:space-x-3 border border-white/20">
             {images.map((_, index) => (
               <button
@@ -195,23 +195,6 @@ export default function HeroSlider() {
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
-            
-            {/* Play/Pause */}
-            <button
-              onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-              className="ml-2 sm:ml-3 p-1 sm:p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-all"
-              aria-label={isAutoPlaying ? "Pause" : "Play"}
-            >
-              {isAutoPlaying ? (
-                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
-              )}
-            </button>
           </div>
         </div>
       )}
@@ -221,7 +204,7 @@ export default function HeroSlider() {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
+            className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-[8] group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
             aria-label="Previous slide"
           >
             <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,7 +214,7 @@ export default function HeroSlider() {
           
           <button
             onClick={nextSlide}
-            className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
+            className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-[8] group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
             aria-label="Next slide"
           >
             <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -242,7 +225,7 @@ export default function HeroSlider() {
       )}
 
       {/* Scroll Indicator - Hidden on mobile */}
-      <div className="hidden sm:block absolute bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+      <div className="hidden sm:block absolute bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 z-[5] animate-bounce">
         <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
