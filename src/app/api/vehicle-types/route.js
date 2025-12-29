@@ -1,102 +1,77 @@
 import { NextResponse } from "next/server";
-import connectDB from "@/lib/mongodb";
-import { ObjectId } from "mongodb";
+import clientPromise from "@/lib/mongodb";
 
-const DB_NAME = "automotivecarcare";
-const COLLECTION_NAME = "vehicletypes";
-
-// GET - Fetch all vehicle types
+// GET all vehicle types
 export async function GET() {
   try {
-    const client = await connectDB();
-    const db = client.db(DB_NAME);
+    const client = await clientPromise;
+    const db = client.db("automotivecarcare");
     const vehicleTypes = await db
-      .collection(COLLECTION_NAME)
+      .collection("vehicleTypes")
       .find({})
       .sort({ order: 1 })
       .toArray();
-    
-    return NextResponse.json({ 
-      success: true, 
-      vehicleTypes 
-    });
+
+    return NextResponse.json({ vehicleTypes });
   } catch (error) {
-    console.error("GET vehicle types error:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    console.error("Vehicle types error:", error);
+    return NextResponse.json({ vehicleTypes: [] });
   }
 }
 
-// POST - Create new vehicle type
+// POST new vehicle type
+// POST new vehicle type
 export async function POST(request) {
   try {
-    const client = await connectDB();
-    const db = client.db(DB_NAME);
-    const body = await request.json();
+    const vehicleData = await request.json();
     
-    // Add timestamps
-    const vehicleData = {
-      ...body,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
+    // Auto-generate slug from name if not provided
+    if (!vehicleData.slug) {
+      vehicleData.slug = vehicleData.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    }
     
-    const result = await db.collection(COLLECTION_NAME).insertOne(vehicleData);
+    const client = await clientPromise;
+    const db = client.db("automotivecarcare");
     
-    const vehicleType = {
-      _id: result.insertedId,
+    const result = await db.collection("vehicleTypes").insertOne({
       ...vehicleData,
-    };
-    
+      createdAt: new Date(),
+    });
+
     return NextResponse.json({ 
       success: true, 
-      vehicleType 
+      id: result.insertedId 
     });
   } catch (error) {
-    console.error("POST vehicle type error:", error);
+    console.error("Vehicle type creation error:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { error: error.message },
       { status: 500 }
     );
   }
 }
 
-// DELETE - Delete vehicle type
+
+// DELETE vehicle type
 export async function DELETE(request) {
   try {
-    const client = await connectDB();
-    const db = client.db(DB_NAME);
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: "Vehicle type ID is required" },
-        { status: 400 }
-      );
-    }
+    const client = await clientPromise;
+    const db = client.db("automotivecarcare");
+    const { ObjectId } = require("mongodb");
     
-    const result = await db.collection(COLLECTION_NAME).deleteOne({
-      _id: new ObjectId(id),
-    });
-    
-    if (result.deletedCount === 0) {
-      return NextResponse.json(
-        { success: false, error: "Vehicle type not found" },
-        { status: 404 }
-      );
-    }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: "Vehicle type deleted successfully" 
-    });
+    await db.collection("vehicleTypes").deleteOne({ _id: new ObjectId(id) });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE vehicle type error:", error);
+    console.error("Vehicle type deletion error:", error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { error: error.message },
       { status: 500 }
     );
   }
