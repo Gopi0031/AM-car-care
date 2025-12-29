@@ -45,9 +45,7 @@ export default function HeroSlider() {
       throw new Error("No images from API");
       
     } catch (error) {
-      setImages([
-
-      ]);
+      setImages([]);
       setLoading(false);
     }
   };
@@ -72,10 +70,10 @@ export default function HeroSlider() {
 
   if (loading) {
     return (
-      <section className="relative h-[600px] md:h-[700px] bg-gradient-to-br from-blue-100 via-blue-100 to-blue-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white mb-4"></div>
-          <p className="text-white text-xl">Loading Premium Experience...</p>
+      <section className="relative h-[400px] sm:h-[500px] md:h-[600px] lg:h-[700px] bg-gradient-to-br from-blue-100 via-blue-100 to-blue-100 flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-t-4 border-b-4 border-white mb-4"></div>
+          <p className="text-white text-lg sm:text-xl">Loading Premium Experience...</p>
         </div>
       </section>
     );
@@ -83,12 +81,12 @@ export default function HeroSlider() {
 
   if (images.length === 0) {
     return (
-      <section className="relative bg-gradient-to-br from-blue-100 via-blue-100 to-blue-100 text-white py-20 min-h-[700px] flex items-center">
+      <section className="relative bg-gradient-to-br from-blue-100 via-blue-100 to-blue-100 text-white py-16 sm:py-20 min-h-[500px] sm:min-h-[600px] lg:min-h-[700px] flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 sm:mb-6 animate-fade-in">
             Premium Car Care Services
           </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-blue-100 max-w-2xl mx-auto px-4">
             Professional automotive care for your vehicle
           </p>
         </div>
@@ -97,7 +95,7 @@ export default function HeroSlider() {
   }
 
   return (
-    <section className="relative h-[600px] md:h-[700px] overflow-hidden bg-black">
+    <section className="relative h-[500px] sm:h-[550px] md:h-[600px] lg:h-[700px] overflow-hidden bg-black">
       {/* Background Images */}
       {images.map((image, index) => (
         <div
@@ -112,8 +110,8 @@ export default function HeroSlider() {
             className="w-full h-full object-cover"
           />
           {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-transparent sm:from-black/70 sm:via-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent sm:from-black/70" />
         </div>
       ))}
 
@@ -121,26 +119,23 @@ export default function HeroSlider() {
       <div className="relative z-10 h-full flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="max-w-3xl">
-            {/* Premium Badge */}
-           
-
             {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight animate-slide-up">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-3 sm:mb-4 md:mb-6 leading-tight animate-slide-up">
               Automotive Car Care
               <span className="block text-blue-400">Services</span>
             </h1>
 
             {/* Subheading */}
-            <p className="text-xl md:text-2xl text-gray-200 mb-8 leading-relaxed animate-slide-up animation-delay-200">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-200 mb-4 sm:mb-6 md:mb-8 leading-relaxed animate-slide-up animation-delay-200">
               Professional automotive care with cutting-edge technology and expert technicians
             </p>
 
             {/* Feature Tags */}
-            <div className="flex flex-wrap gap-3 mb-8 animate-slide-up animation-delay-300">
+            <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6 md:mb-8 animate-slide-up animation-delay-300">
               {['Expert Technicians', 'Premium Products', 'Quick Service', 'Best Price'].map((tag, i) => (
                 <span
                   key={i}
-                  className="bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-lg border border-white/20 text-sm font-medium hover:bg-white/20 transition-all duration-300"
+                  className="bg-white/10 backdrop-blur-md text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border border-white/20 text-xs sm:text-sm font-medium hover:bg-white/20 transition-all duration-300"
                 >
                   {tag}
                 </span>
@@ -148,36 +143,36 @@ export default function HeroSlider() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-slide-up animation-delay-400">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 animate-slide-up animation-delay-400">
               <Link href="/booking">
-                <button className="group px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-lg shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2">
+                <button className="group w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-base sm:text-lg shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2">
                   <span>Book Service Now</span>
-                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </button>
               </Link>
               
               <Link href="/services">
-                <button className="px-8 py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white rounded-xl font-bold text-lg border-2 border-white/30 hover:border-white/50 transition-all duration-300 transform hover:scale-105">
+                <button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-md hover:bg-white/20 text-white rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:border-white/50 transition-all duration-300 transform hover:scale-105">
                   View Services
                 </button>
               </Link>
             </div>
 
             {/* Contact Info */}
-            <div className="mt-8 flex flex-wrap items-center gap-4 sm:gap-6 text-white/80 animate-slide-up animation-delay-500">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-3 sm:gap-4 md:gap-6 text-white/80 animate-slide-up animation-delay-500">
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
                 </svg>
-                <span className="font-medium">+91 12345 67890</span>
+                <span className="font-medium text-sm sm:text-base">+91 12345 67890</span>
               </div>
               <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                 </svg>
-                <span className="font-medium">Open 24/7</span>
+                <span className="font-medium text-sm sm:text-base">Open 24/7</span>
               </div>
             </div>
           </div>
@@ -186,16 +181,16 @@ export default function HeroSlider() {
 
       {/* Navigation Dots */}
       {images.length > 1 && (
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
-          <div className="bg-black/30 backdrop-blur-md px-6 py-3 rounded-full flex items-center space-x-3 border border-white/20">
+        <div className="absolute bottom-6 sm:bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="bg-black/30 backdrop-blur-md px-4 sm:px-6 py-2 sm:py-3 rounded-full flex items-center space-x-2 sm:space-x-3 border border-white/20">
             {images.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`transition-all duration-300 rounded-full ${
                   index === currentIndex 
-                    ? "bg-blue-500 w-10 h-3 shadow-lg shadow-blue-500/50" 
-                    : "bg-white/50 hover:bg-white/75 w-3 h-3"
+                    ? "bg-blue-500 w-8 sm:w-10 h-2.5 sm:h-3 shadow-lg shadow-blue-500/50" 
+                    : "bg-white/50 hover:bg-white/75 w-2.5 sm:w-3 h-2.5 sm:h-3"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
@@ -204,15 +199,15 @@ export default function HeroSlider() {
             {/* Play/Pause */}
             <button
               onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-              className="ml-3 p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-all"
+              className="ml-2 sm:ml-3 p-1 sm:p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-all"
               aria-label={isAutoPlaying ? "Pause" : "Play"}
             >
               {isAutoPlaying ? (
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               ) : (
-                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
                 </svg>
               )}
@@ -226,29 +221,29 @@ export default function HeroSlider() {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
+            className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
             aria-label="Previous slide"
           >
-            <svg className="w-6 h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           
           <button
             onClick={nextSlide}
-            className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
+            className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 group bg-black/30 hover:bg-black/50 backdrop-blur-md text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/20 hover:border-white/40 hover:scale-110"
             aria-label="Next slide"
           >
-            <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
             </svg>
           </button>
         </>
       )}
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
-        <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Scroll Indicator - Hidden on mobile */}
+      <div className="hidden sm:block absolute bottom-20 sm:bottom-24 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
+        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
