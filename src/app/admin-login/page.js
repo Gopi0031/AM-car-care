@@ -20,7 +20,7 @@ export default function AdminLogin() {
     // Simple hardcoded authentication
     if (
       credentials.username === "Automotive Car-Care" &&
-      credentials.password === "Automotive@2025"
+      credentials.password === "amcr@2025"
     ) {
       localStorage.setItem("adminAuth", "true");
       router.push("/admin/dashboard");
