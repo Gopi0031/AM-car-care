@@ -280,7 +280,7 @@ export async function sendBookingNotification(booking) {
                         <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                           <tr>
                             <td style="padding-top: 30px; text-align: center;">
-                              <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/admin/dashboard" 
+                              <a href="${'https://am-car-care-01.vercel.app/'}/admin/dashboard" 
                                  style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #00b894 0%, #00a085 100%); color: #ffffff; text-decoration: none; border-radius: 50px; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(0,184,148,0.3); transition: all 0.3s ease;">
                                 🚀 Go to Dashboard
                               </a>
