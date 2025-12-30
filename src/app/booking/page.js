@@ -4,14 +4,17 @@ import { useState, useEffect } from "react";
 
 export default function BookingPage() {
   const [services, setServices] = useState([]);
-  const [vehicleTypes, setVehicleTypes] = useState([]);
+  const [vehicleBrands, setVehicleBrands] = useState([]);
+  const [availableModels, setAvailableModels] = useState([]);
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     countryCode: "+91",
     phone: "",
     service: "",
-    vehicleType: "",
+    vehicleBrand: "",
+    vehicleModel: "",
     bookingDate: "",
     bookingTime: "",
     notes: "",
@@ -35,7 +38,6 @@ export default function BookingPage() {
   useEffect(() => {
     fetchData();
     
-    // Check if service is pre-selected from URL
     const urlParams = new URLSearchParams(window.location.search);
     const preSelectedService = urlParams.get('service');
     if (preSelectedService) {
@@ -45,41 +47,55 @@ export default function BookingPage() {
 
   const fetchData = async () => {
     try {
-      console.log("Fetching services and vehicle types...");
+      console.log("Fetching services and vehicle brands...");
       
-      const [servicesRes, vehiclesRes] = await Promise.all([
+      const [servicesRes, brandsRes] = await Promise.all([
         fetch("/api/services"),
-        fetch("/api/vehicle-types"),
+        fetch("/api/vehicle-brands"),
       ]);
 
       console.log("Services response status:", servicesRes.status);
-      console.log("Vehicles response status:", vehiclesRes.status);
+      console.log("Brands response status:", brandsRes.status);
 
-      // Check if responses are OK
       if (!servicesRes.ok) {
         console.error("Services API failed:", servicesRes.status);
-        const text = await servicesRes.text();
-        console.error("Services response:", text.substring(0, 200));
         return;
       }
       
-      if (!vehiclesRes.ok) {
-        console.error("Vehicle types API failed:", vehiclesRes.status);
-        const text = await vehiclesRes.text();
-        console.error("Vehicles response:", text.substring(0, 200));
+      if (!brandsRes.ok) {
+        console.error("Vehicle brands API failed:", brandsRes.status);
         return;
       }
 
       const servicesData = await servicesRes.json();
-      const vehiclesData = await vehiclesRes.json();
+      const brandsData = await brandsRes.json();
 
       console.log("Services loaded:", servicesData.services?.length || 0);
-      console.log("Vehicle types loaded:", vehiclesData.vehicleTypes?.length || 0);
+      console.log("Vehicle brands loaded:", brandsData.brands?.length || 0);
 
       setServices(servicesData.services || []);
-      setVehicleTypes(vehiclesData.vehicleTypes || []);
+      setVehicleBrands(brandsData.brands || []);
     } catch (error) {
       console.error("Error fetching data:", error);
+    }
+  };
+
+  // Handle brand change - show models for selected brand
+  const handleBrandChange = (e) => {
+    const selectedBrandSlug = e.target.value;
+    setFormData({ 
+      ...formData, 
+      vehicleBrand: selectedBrandSlug,
+      vehicleModel: "" // Reset model when brand changes
+    });
+    
+    // Find selected brand and get its models
+    const selectedBrand = vehicleBrands.find(b => b.slug === selectedBrandSlug);
+    if (selectedBrand) {
+      console.log("Selected brand models:", selectedBrand.models);
+      setAvailableModels(selectedBrand.models || []);
+    } else {
+      setAvailableModels([]);
     }
   };
 
@@ -89,16 +105,11 @@ export default function BookingPage() {
 
   const handlePhoneChange = (e) => {
     const value = e.target.value;
-    
-    // Remove all non-numeric characters
     const numericValue = value.replace(/\D/g, "");
-    
-    // Limit to 10 digits
     const limitedValue = numericValue.slice(0, 10);
     
     setFormData({ ...formData, phone: limitedValue });
     
-    // Validate phone number
     if (limitedValue.length > 0 && limitedValue.length < 10) {
       setPhoneError("Phone number must be 10 digits");
     } else {
@@ -109,7 +120,6 @@ export default function BookingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Final phone validation
     if (formData.phone.length !== 10) {
       setPhoneError("Phone number must be exactly 10 digits");
       return;
@@ -119,10 +129,9 @@ export default function BookingPage() {
     setMessage("");
 
     try {
-      // Get selected service name and price for email
       const selectedService = services.find(s => s.slug === formData.service);
+      const selectedBrand = vehicleBrands.find(b => b.slug === formData.vehicleBrand);
       
-      // Combine country code with phone number
       const bookingData = {
         name: formData.name,
         email: formData.email,
@@ -130,7 +139,8 @@ export default function BookingPage() {
         service: formData.service,
         serviceName: selectedService?.name || formData.service,
         servicePrice: selectedService?.price || "N/A",
-        vehicleType: formData.vehicleType,
+        vehicleBrand: selectedBrand?.name || formData.vehicleBrand,
+        vehicleModel: formData.vehicleModel,
         bookingDate: formData.bookingDate,
         bookingTime: formData.bookingTime,
         notes: formData.notes,
@@ -144,15 +154,11 @@ export default function BookingPage() {
         body: JSON.stringify(bookingData),
       });
 
-      console.log("Booking response status:", response.status);
-      console.log("Response content-type:", response.headers.get("content-type"));
-
-      // Check if response is JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
         console.error("Expected JSON but got:", text.substring(0, 200));
-        setMessage("Server error: API route not found or returned invalid response. Please check console.");
+        setMessage("Server error: API route not found or returned invalid response.");
         return;
       }
 
@@ -167,14 +173,14 @@ export default function BookingPage() {
           countryCode: "+91",
           phone: "",
           service: "",
-          vehicleType: "",
+          vehicleBrand: "",
+          vehicleModel: "",
           bookingDate: "",
           bookingTime: "",
           notes: "",
         });
         setPhoneError("");
-        
-        // Scroll to message
+        setAvailableModels([]);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         setMessage(data.error || "Failed to submit booking. Please try again.");
@@ -264,8 +270,8 @@ export default function BookingPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none"
-                      placeholder="John Doe"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none"
+                      placeholder="Your Name"
                     />
                   </div>
 
@@ -279,8 +285,8 @@ export default function BookingPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none"
-                      placeholder="john@example.com"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none"
+                      placeholder="yourmail@gmail.com"
                     />
                   </div>
 
@@ -293,7 +299,7 @@ export default function BookingPage() {
                         name="countryCode"
                         value={formData.countryCode}
                         onChange={handleChange}
-                        className="w-36 px-4 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                        className="w-36 px-4 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
                       >
                         {countryCodes.map((country) => (
                           <option key={country.code} value={country.code}>
@@ -310,12 +316,12 @@ export default function BookingPage() {
                           required
                           maxLength="10"
                           pattern="\d{10}"
-                          className={`w-full px-5 py-4 border-2 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none ${
+                          className={`w-full px-5 py-4 border-2 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none ${
                             phoneError
                               ? "border-red-500 focus:border-red-500"
                               : "border-gray-300 focus:border-gray-900"
                           }`}
-                          placeholder="9876543210"
+                          placeholder="1234567890"
                         />
                         {phoneError && (
                           <p className="text-red-600 text-sm mt-2 flex items-center font-light">
@@ -342,14 +348,15 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* Service Details */}
+              {/* Service & Vehicle Details */}
               <div>
                 <h3 className="text-2xl font-light text-white mb-8 pb-4 border-b border-gray-200" style={{ fontFamily: 'Georgia, serif' }}>
-                  Service Details
+                  Service & Vehicle Details
                 </h3>
                 <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <label className="block text-sm font-light text-lg text-white mb-3 tracking-wide uppercase">
+                  {/* Service Selection */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
                       Select Service *
                     </label>
                     <select
@@ -357,7 +364,7 @@ export default function BookingPage() {
                       value={formData.service}
                       onChange={handleChange}
                       required
-                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
                     >
                       <option value="">Choose a service</option>
                       {services.map((service) => (
@@ -367,39 +374,72 @@ export default function BookingPage() {
                       ))}
                     </select>
                     {services.length === 0 && (
-                      <p className="text-sm text-red-600 mt-2 flex items-center font-light">
+                      <p className="text-sm text-red-400 mt-2 flex items-center font-light">
                         <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        No services available. Admin must add services first.
+                        ⚠️ No services available. Admin must add services first.
                       </p>
                     )}
                   </div>
 
+                  {/* Vehicle Brand Selection */}
                   <div>
                     <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
-                      Vehicle Type *
+                      Vehicle Brand *
                     </label>
                     <select
-                      name="vehicleType"
-                      value={formData.vehicleType}
-                      onChange={handleChange}
+                      name="vehicleBrand"
+                      value={formData.vehicleBrand}
+                      onChange={handleBrandChange}
                       required
-                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
                     >
-                      <option value="">Select vehicle type</option>
-                      {vehicleTypes.map((vehicle) => (
-                        <option key={vehicle._id} value={vehicle.slug}>
-                          {vehicle.name}
+                      <option value="">Select brand</option>
+                      {vehicleBrands.map((brand) => (
+                        <option key={brand._id} value={brand.slug}>
+                          {brand.name}
                         </option>
                       ))}
                     </select>
-                    {vehicleTypes.length === 0 && (
-                      <p className="text-sm text-red-600 mt-2 flex items-center font-light">
+                    {vehicleBrands.length === 0 && (
+                      <p className="text-sm text-red-400 mt-2 flex items-center font-light">
                         <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        No vehicle types available. Admin must add vehicle types first.
+                        ⚠️ No brands available. Admin must add brands first.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Vehicle Model Selection */}
+                  <div>
+                    <label className="block text-sm font-light text-white mb-3 tracking-wide uppercase">
+                      Vehicle Model *
+                    </label>
+                    <select
+                      name="vehicleModel"
+                      value={formData.vehicleModel}
+                      onChange={handleChange}
+                      required
+                      disabled={!formData.vehicleBrand || availableModels.length === 0}
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {!formData.vehicleBrand ? "Select brand first" : "Select model"}
+                      </option>
+                      {availableModels.map((model, index) => (
+                        <option key={index} value={model}>
+                          {model}
+                        </option>
+                      ))}
+                    </select>
+                    {formData.vehicleBrand && availableModels.length === 0 && (
+                      <p className="text-sm text-amber-400 mt-2 flex items-center font-light">
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        ℹ️ No models available for this brand.
                       </p>
                     )}
                   </div>
@@ -423,7 +463,7 @@ export default function BookingPage() {
                       onChange={handleChange}
                       required
                       min={new Date().toISOString().split("T")[0]}
-                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none"
                     />
                   </div>
 
@@ -436,7 +476,7 @@ export default function BookingPage() {
                       value={formData.bookingTime}
                       onChange={handleChange}
                       required
-                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
+                      className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 font-light focus:outline-none appearance-none cursor-pointer"
                     >
                       <option value="">Select time slot</option>
                       <option value="07:00 AM">07:00 AM</option>
@@ -467,7 +507,7 @@ export default function BookingPage() {
                   value={formData.notes}
                   onChange={handleChange}
                   rows={5}
-                  className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-red-900 transition-all duration-300 resize-none font-light focus:outline-none"
+                  className="w-full px-5 py-4 border-2 border-gray-300 focus:border-gray-900 bg-white text-xl text-gray-900 transition-all duration-300 resize-none font-light focus:outline-none"
                   placeholder="Any specific requirements or concerns..."
                 />
               </div>
@@ -476,7 +516,7 @@ export default function BookingPage() {
               <div className="pt-6">
                 <button
                   type="submit"
-                  disabled={loading || phoneError || formData.phone.length !== 10 || services.length === 0 || vehicleTypes.length === 0}
+                  disabled={loading || phoneError || formData.phone.length !== 10 || services.length === 0 || vehicleBrands.length === 0}
                   className="group relative w-full py-6 border-4 border-green-900 text-white text-center text-md tracking-[0.2em] uppercase font-light overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500"
                 >
                   <span className="absolute inset-0 bg-gray-900 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></span>

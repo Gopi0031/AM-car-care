@@ -1,11 +1,16 @@
 import Link from "next/link";
 import HeroSlider from "@/components/HeroSlider";
+import QuickBookingPopup from "@/components/QuickBookingPopup";
+import ViewCarTypeSidebar from "@/components/ViewCarTypeSidebar";
 
 export default function Home() {
   return (
     <div className="bg-background">
+      
       {/* Hero Section with Image Slider */}
       <HeroSlider />
+      <QuickBookingPopup />
+      <ViewCarTypeSidebar />
       <section className="py-20 md:py-28 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-sm tracking-[0.3em] uppercase text-gray-500 mb-6 font-light">
