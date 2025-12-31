@@ -43,8 +43,8 @@ export async function POST(request) {
     
     console.log("Received booking data:", body);
     
-    // Validate required fields
-    const requiredFields = ['name', 'email', 'phone', 'service', 'vehicleType', 'bookingDate', 'bookingTime'];
+    // Updated validation for new structure
+    const requiredFields = ['name', 'email', 'phone', 'service', 'vehicleBrand', 'vehicleModel', 'bookingDate', 'bookingTime'];
     const missingFields = requiredFields.filter(field => !body[field]);
     
     if (missingFields.length > 0) {
@@ -55,7 +55,7 @@ export async function POST(request) {
       );
     }
     
-    // Create booking document
+    // Create booking document with updated structure
     const bookingData = {
       name: body.name,
       email: body.email,
@@ -63,7 +63,8 @@ export async function POST(request) {
       service: body.service,
       serviceName: body.serviceName || "",
       servicePrice: body.servicePrice || "",
-      vehicleType: body.vehicleType,
+      vehicleBrand: body.vehicleBrand,        // Changed from vehicleType
+      vehicleModel: body.vehicleModel,        // Added model field
       bookingDate: body.bookingDate,
       bookingTime: body.bookingTime,
       notes: body.notes || "",
@@ -107,7 +108,6 @@ export async function POST(request) {
   }
 }
 
-// PUT - Accept/Update booking status
 // PUT - Accept/Update booking status
 export async function PUT(request) {
   try {
@@ -180,8 +180,6 @@ export async function PUT(request) {
         console.log("\n📧 EMAIL SENDING ATTEMPT");
         console.log("To:", updatedBooking.email);
         console.log("From:", process.env.EMAIL_USER);
-        console.log("Has password:", !!process.env.EMAIL_APP_PASSWORD);
-        console.log("Password length:", process.env.EMAIL_APP_PASSWORD?.length || 0);
         
         const { sendAcceptanceEmail } = await import("@/lib/email");
         
@@ -197,21 +195,11 @@ export async function PUT(request) {
         console.error("Error message:", error.message);
         console.error("Error code:", error.code);
         console.error("Full error:", error);
-        
-        // Check specific email errors
-        if (error.message.includes("Invalid login")) {
-          console.error("❌ Gmail login failed - Check EMAIL_APP_PASSWORD");
-        } else if (error.message.includes("ECONNREFUSED")) {
-          console.error("❌ Cannot connect to Gmail servers");
-        } else if (error.message.includes("ENOTFOUND")) {
-          console.error("❌ DNS error - Check internet connection");
-        }
       }
     }
     
     console.log("========== Request completed ==========\n");
     
-    // Return response with email status
     return NextResponse.json({ 
       success: true, 
       booking: updatedBooking,
@@ -231,7 +219,6 @@ export async function PUT(request) {
     );
   }
 }
-
 
 // DELETE - Delete booking
 export async function DELETE(request) {
