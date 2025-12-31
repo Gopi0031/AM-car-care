@@ -43,7 +43,6 @@ export async function POST(request) {
     
     console.log("Received booking data:", body);
     
-    // Updated validation for new structure
     const requiredFields = ['name', 'email', 'phone', 'service', 'vehicleBrand', 'vehicleModel', 'bookingDate', 'bookingTime'];
     const missingFields = requiredFields.filter(field => !body[field]);
     
@@ -55,7 +54,6 @@ export async function POST(request) {
       );
     }
     
-    // Create booking document with updated structure
     const bookingData = {
       name: body.name,
       email: body.email,
@@ -63,8 +61,8 @@ export async function POST(request) {
       service: body.service,
       serviceName: body.serviceName || "",
       servicePrice: body.servicePrice || "",
-      vehicleBrand: body.vehicleBrand,        // Changed from vehicleType
-      vehicleModel: body.vehicleModel,        // Added model field
+      vehicleBrand: body.vehicleBrand || "",
+      vehicleModel: body.vehicleModel || "",
       bookingDate: body.bookingDate,
       bookingTime: body.bookingTime,
       notes: body.notes || "",
@@ -193,8 +191,6 @@ export async function PUT(request) {
         emailError = error.message;
         console.error("\n❌ EMAIL FAILED!");
         console.error("Error message:", error.message);
-        console.error("Error code:", error.code);
-        console.error("Full error:", error);
       }
     }
     
@@ -212,7 +208,6 @@ export async function PUT(request) {
     
   } catch (error) {
     console.error("❌ PUT booking error:", error.message);
-    console.error("Error stack:", error.stack);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

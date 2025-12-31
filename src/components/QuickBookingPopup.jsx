@@ -35,7 +35,7 @@ export default function QuickBookingPopup() {
       formData.number
     )}%0ADescription: ${encodeURIComponent(formData.description)}`;
 
-    const whatsappNumber = "7995157753";
+    const whatsappNumber = NEXT_PUBLIC_SITE_URL || "1234567890";
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${message}`;
 
     window.open(whatsappURL, "_blank");
