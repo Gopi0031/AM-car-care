@@ -546,7 +546,7 @@
   text-align: center;
 }
 
-.spinner {
+/* .spinner {
   border-radius: 9999px;
   height: 5rem;
   width: 5rem;
@@ -561,7 +561,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-}
+} */
 
 .icon-sm {
   width: 1.125rem;
