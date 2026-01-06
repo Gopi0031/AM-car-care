@@ -4,63 +4,55 @@ import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const brandModelsData = {
-  "toyota": [
-    { name: "Camry", serviceCount: 6, image: "/models/old-car.jpg" },
-    { name: "Fortuner", serviceCount: 6, image: "/models/toyota-fortuner.png" },
-    { name: "Innova", serviceCount: 6, image: "/models/toyota-innova.png" },
-  ],
-  "honda": [
-    { name: "City", serviceCount: 6, image: "/models/honda-city.png" },
-    { name: "Civic", serviceCount: 6, image: "/models/honda-civic.png" },
-  ],
-  "hyundai": [
-    { name: "Creta", serviceCount: 6, image: "/models/hyundai-creta.png" },
-    { name: "Verna", serviceCount: 6, image: "/models/hyundai-verna.png" },
-  ],
-  "maruti-suzuki": [
-    { name: "Swift", serviceCount: 6, image: "/models/maruti-swift.png" },
-    { name: "Brezza", serviceCount: 6, image: "/models/maruti-brezza.png" },
-  ],
-  "tata": [
-    { name: "Nexon", serviceCount: 6, image: "/models/tata-nexon.png" },
-    { name: "Harrier", serviceCount: 6, image: "/models/tata-harrier.png" },
-  ],
-  "mahindra": [
-    { name: "Thar", serviceCount: 6, image: "/models/mahindra-thar.png" },
-    { name: "Scorpio", serviceCount: 6, image: "/models/mahindra-scorpio.png" },
-  ],
-  "kia": [
-    { name: "Seltos", serviceCount: 6, image: "/models/kia-seltos.png" },
-    { name: "Sonet", serviceCount: 6, image: "/models/kia-sonet.png" },
-  ],
-  "volkswagen": [
-    { name: "Polo", serviceCount: 6, image: "/models/volkswagen-polo.png" },
-    { name: "Taigun", serviceCount: 6, image: "/models/volkswagen-taigun.png" },
-  ],
-};
-
 export default function BrandModelsPage() {
   const router = useRouter();
   const params = useParams();
   const brandSlug = params.brand;
   const [isVisible, setIsVisible] = useState(false);
   const [imageErrors, setImageErrors] = useState({});
+  const [models, setModels] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const brandName = brandSlug.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  const models = brandModelsData[brandSlug] || [];
 
   useEffect(() => {
+    fetchModels();
     setTimeout(() => setIsVisible(true), 100);
-  }, []);
+  }, [brandSlug]);
+
+  const fetchModels = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/car-models?brand=${brandSlug}`);
+      const data = await response.json();
+      if (data.success) {
+        setModels(data.models);
+      }
+    } catch (error) {
+      console.error("Error fetching models:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleModelClick = (model) => {
-    router.push(`/car-brands/${brandSlug}/${model.name.toLowerCase()}`);
+    router.push(`/car-brands/${brandSlug}/${model.slug}`);
   };
 
   const handleImageError = (index) => {
     setImageErrors(prev => ({ ...prev, [index]: true }));
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-amber-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading models...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -127,11 +119,11 @@ export default function BrandModelsPage() {
         </div>
 
         {/* Models Grid with Images */}
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pb-8 sm:pb-12 md:pb-16 lg:pb-20">
+        <div className="max-w-8xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pb-8 sm:pb-12 md:pb-16 lg:pb-20">
           <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             {models.map((model, index) => (
               <button
-                key={index}
+                key={model._id}
                 onClick={() => handleModelClick(model)}
                 className={`group bg-white border-2 border-gray-200 rounded-2xl sm:rounded-3xl overflow-hidden hover:border-amber-400 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 sm:hover:-translate-y-2 active:scale-95 touch-manipulation ${
                   isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
@@ -251,11 +243,11 @@ export default function BrandModelsPage() {
         }
         
         @media (min-width: 475px) {
-          .xs\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .xs\:inline { display: inline; }
-          .xs\:w-20 { width: 5rem; }
-          .xs\:h-20 { height: 5rem; }
-          .xs\:h-44 { height: 11rem; }
+          .xs\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .xs\\:inline { display: inline; }
+          .xs\\:w-20 { width: 5rem; }
+          .xs\\:h-20 { height: 5rem; }
+          .xs\\:h-44 { height: 11rem; }
         }
       `}</style>
     </>

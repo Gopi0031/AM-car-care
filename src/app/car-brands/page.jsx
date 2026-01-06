@@ -4,89 +4,94 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const carBrandsData = [
-  { 
-    id: 1, 
-    name: "Toyota", 
-    logo: "/logos/old-car.jpg", // Add your logo images to public/logos/
-    modelCount: 3,
-    models: ["Camry", "Fortuner", "Innova"],
-    color: "from-red-50 to-red-100"
-  },
-  { 
-    id: 2, 
-    name: "Honda", 
-    logo: "/logos/honda.png",
-    modelCount: 2,
-    models: ["City", "Civic"],
-    color: "from-blue-50 to-blue-100"
-  },
-  { 
-    id: 3, 
-    name: "Hyundai", 
-    logo: "/logos/hyundai.png",
-    modelCount: 2,
-    models: ["Creta", "Verna"],
-    color: "from-indigo-50 to-indigo-100"
-  },
-  { 
-    id: 4, 
-    name: "Maruti Suzuki", 
-    logo: "/logos/maruti.png",
-    modelCount: 2,
-    models: ["Swift", "Brezza"],
-    color: "from-orange-50 to-orange-100"
-  },
-  { 
-    id: 5, 
-    name: "Tata", 
-    logo: "/logos/tata.png",
-    modelCount: 2,
-    models: ["Nexon", "Harrier"],
-    color: "from-purple-50 to-purple-100"
-  },
-  { 
-    id: 6, 
-    name: "Mahindra", 
-    logo: "/logos/mahindra.png",
-    modelCount: 2,
-    models: ["Thar", "Scorpio"],
-    color: "from-green-50 to-green-100"
-  },
-  { 
-    id: 7, 
-    name: "Kia", 
-    logo: "/logos/kia.png",
-    modelCount: 2,
-    models: ["Seltos", "Sonet"],
-    color: "from-pink-50 to-pink-100"
-  },
-  { 
-    id: 8, 
-    name: "Volkswagen", 
-    logo: "/logos/volkswagen.png",
-    modelCount: 2,
-    models: ["Polo", "Taigun"],
-    color: "from-cyan-50 to-cyan-100"
-  },
-];
-
 export default function CarBrandsPage() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [carBrandsData, setCarBrandsData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetchBrandsWithModels();
     setTimeout(() => setIsVisible(true), 100);
   }, []);
 
+  const fetchBrandsWithModels = async () => {
+    setLoading(true);
+    try {
+      // Fetch brands with logos
+      const brandsRes = await fetch('/api/car-brands');
+      const brandsData = await brandsRes.json();
+
+      // Fetch all car models
+      const modelsRes = await fetch('/api/car-models');
+      const modelsData = await modelsRes.json();
+
+      if (brandsData.success && modelsData.success) {
+        // Group models by brand
+        const brandsMap = {};
+
+        brandsData.brands.forEach(brand => {
+          brandsMap[brand.brandSlug] = {
+            name: brand.name,
+            brandSlug: brand.brandSlug,
+            logo: brand.logo,
+            models: [],
+            modelCount: 0,
+            color: getColorForBrand(brand.name),
+          };
+        });
+
+        modelsData.models.forEach(model => {
+          if (brandsMap[model.brandSlug]) {
+            brandsMap[model.brandSlug].models.push(model.name);
+            brandsMap[model.brandSlug].modelCount++;
+          }
+        });
+
+        const brandsArray = Object.values(brandsMap).sort((a, b) => a.name.localeCompare(b.name));
+        setCarBrandsData(brandsArray);
+      }
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getColorForBrand = (brandName) => {
+    const colors = [
+      "from-red-50 to-red-100",
+      "from-blue-50 to-blue-100",
+      "from-green-50 to-green-100",
+      "from-yellow-50 to-yellow-100",
+      "from-purple-50 to-purple-100",
+      "from-pink-50 to-pink-100",
+      "from-indigo-50 to-indigo-100",
+      "from-cyan-50 to-cyan-100",
+    ];
+    const index = brandName.charCodeAt(0) % colors.length;
+    return colors[index];
+  };
+
   const handleBrandClick = (brand) => {
-    router.push(`/car-brands/${brand.name.toLowerCase().replace(/\s+/g, '-')}`);
+    router.push(`/car-brands/${brand.brandSlug}`);
   };
 
   const filteredBrands = carBrandsData.filter(brand =>
     brand.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white via-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-amber-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading brands...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -176,36 +181,30 @@ export default function CarBrandsPage() {
         </div>
 
         {/* Brands Grid with Logo + Models */}
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pb-8 sm:pb-12 md:pb-16">
+        <div className="max-w-8xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pb-8 sm:pb-12 md:pb-16">
           {filteredBrands.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
               {filteredBrands.map((brand, index) => (
                 <button
-                  key={brand.id}
+                  key={brand.brandSlug}
                   onClick={() => handleBrandClick(brand)}
-                  className={`group bg-white border-2 border-gray-100 rounded-2xl sm:rounded-3xl p-5 sm:p-6 hover:border-amber-400 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 active:scale-95 touch-manipulation text-left ${
+                  className={`group bg-transparent border-2 border-gray-300 rounded-2xl sm:rounded-3xl p-5 sm:p-6 hover:border-amber-400 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 active:scale-95 touch-manipulation text-left ${
                     isVisible ? 'animate-slideUp' : 'opacity-0'
                   }`}
                   style={{ animationDelay: `${index * 60}ms` }}
                 >
                   {/* Logo Container */}
                   <div className={`relative w-full aspect-video bg-gradient-to-br ${brand.color} rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 overflow-hidden group-hover:from-amber-50 group-hover:to-amber-100 transition-all duration-500`}>
-                    <div className="relative w-24 h-24 sm:w-28 sm:h-28">
+                    <div className="relative w-32 h-32 sm:w-40 sm:h-40">
                       <Image
                         src={brand.logo}
                         alt={`${brand.name} logo`}
                         fill
-                        className="object-contain p-2 transition-transform duration-500 group-hover:scale-110"
+                        className="object-contain transition-transform duration-500 group-hover:scale-110"
                         onError={(e) => {
-                          // Fallback to SVG icon if image fails to load
                           e.target.style.display = 'none';
                         }}
                       />
-                      {/* Fallback SVG Icon */}
-                      <svg className="w-full h-full text-gray-400 p-4 group-hover:text-gray-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
-                        <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1v-5a1 1 0 00-.293-.707l-2-2A1 1 0 0015 7h-1z" />
-                      </svg>
                     </div>
                     
                     {/* Shimmer Effect */}
@@ -225,16 +224,23 @@ export default function CarBrandsPage() {
                     </div>
                     
                     {/* Models List */}
-                    <div className="flex flex-wrap gap-2">
-                      {brand.models.map((model, idx) => (
-                        <span 
-                          key={idx}
-                          className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gray-100 group-hover:bg-amber-100 text-xs font-medium text-gray-700 group-hover:text-amber-800 transition-colors duration-300"
-                        >
-                          {model}
-                        </span>
-                      ))}
-                    </div>
+                    {brand.models.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {brand.models.slice(0, 3).map((model, idx) => (
+                          <span 
+                            key={idx}
+                            className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gray-100 group-hover:bg-amber-100 text-xs font-medium text-gray-700 group-hover:text-amber-800 transition-colors duration-300"
+                          >
+                            {model}
+                          </span>
+                        ))}
+                        {brand.models.length > 3 && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gray-100 group-hover:bg-amber-100 text-xs font-medium text-gray-700 group-hover:text-amber-800 transition-colors duration-300">
+                            +{brand.models.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Arrow Icon */}

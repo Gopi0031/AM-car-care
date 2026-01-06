@@ -10,14 +10,20 @@ export default function AdminDashboard() {
   const [services, setServices] = useState([]);
   const [vehicleBrands, setVehicleBrands] = useState([]);
   const [heroImages, setHeroImages] = useState([]);
+  const [carBrands, setCarBrands] = useState([]); // NEW
+  const [carModels, setCarModels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(null);
   const [message, setMessage] = useState("");
   const [editingService, setEditingService] = useState(null);
   const [editingBrand, setEditingBrand] = useState(null);
+  const [editingCarBrand, setEditingCarBrand] = useState(null); // NEW
+  const [editingCarModel, setEditingCarModel] = useState(null);
   const [showServiceForm, setShowServiceForm] = useState(false);
   const [showBrandForm, setShowBrandForm] = useState(false);
+  const [showCarBrandForm, setShowCarBrandForm] = useState(false); // NEW
+  const [showCarModelForm, setShowCarModelForm] = useState(false);
   const router = useRouter();
 
   const [serviceForm, setServiceForm] = useState({
@@ -25,6 +31,22 @@ export default function AdminDashboard() {
   });
 
   const [brandForm, setBrandForm] = useState({ name: "", models: "" });
+
+  // NEW: Car Brand Form State
+  const [carBrandForm, setCarBrandForm] = useState({
+    name: "",
+    logo: "",
+    cloudinaryPublicId: "",
+  });
+
+  // Car Model Form State
+  const [carModelForm, setCarModelForm] = useState({
+    brand: "",
+    name: "",
+    image: "",
+    cloudinaryPublicId: "",
+    serviceCount: 6,
+  });
 
   useEffect(() => {
     const isAuth = localStorage.getItem("adminAuth");
@@ -38,17 +60,21 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [bookingsRes, imagesRes, servicesRes, brandsRes] = await Promise.all([
+      const [bookingsRes, imagesRes, servicesRes, brandsRes, carBrandsRes, modelsRes] = await Promise.all([
         fetch("/api/bookings").catch(() => ({ ok: false })),
         fetch("/api/cloudinary-images").catch(() => ({ ok: false })),
         fetch("/api/services").catch(() => ({ ok: false })),
         fetch("/api/vehicle-brands").catch(() => ({ ok: false })),
+        fetch("/api/car-brands").catch(() => ({ ok: false })), // NEW
+        fetch("/api/car-models").catch(() => ({ ok: false })),
       ]);
 
       if (bookingsRes.ok) setBookings((await bookingsRes.json()).bookings || []);
       if (imagesRes.ok) setHeroImages((await imagesRes.json()).images || []);
       if (servicesRes.ok) setServices((await servicesRes.json()).services || []);
       if (brandsRes.ok) setVehicleBrands((await brandsRes.json()).brands || []);
+      if (carBrandsRes.ok) setCarBrands((await carBrandsRes.json()).brands || []); // NEW
+      if (modelsRes.ok) setCarModels((await modelsRes.json()).models || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -64,6 +90,22 @@ export default function AdminDashboard() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) setPreview(URL.createObjectURL(file));
+  };
+
+  // NEW: Handle Car Brand Logo Upload
+  const handleCarBrandLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  // Handle Car Model Image Upload
+  const handleCarModelImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleImageUpload = async (e) => {
@@ -230,6 +272,184 @@ export default function AdminDashboard() {
     }
   };
 
+  // NEW: Car Brand Submit Handler
+  const handleCarBrandSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setUploading(true);
+
+    try {
+      const fileInput = document.querySelector('input[name="carBrandLogo"]');
+      const file = fileInput?.files[0];
+
+      let logoUrl = carBrandForm.logo;
+      let publicId = carBrandForm.cloudinaryPublicId;
+
+      // Upload logo if new file selected
+      if (file) {
+        const signatureRes = await fetch(`/api/upload-signature?folder=automotive-carcare/car-brands`);
+        const signatureData = await signatureRes.json();
+
+        if (signatureData.error) throw new Error(signatureData.error);
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("timestamp", signatureData.timestamp);
+        formData.append("signature", signatureData.signature);
+        formData.append("api_key", signatureData.apiKey);
+        formData.append("folder", signatureData.folder);
+
+        const cloudinaryRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/image/upload`,
+          { method: "POST", body: formData }
+        );
+
+        const result = await cloudinaryRes.json();
+        if (result.error) throw new Error(result.error.message);
+
+        logoUrl = result.secure_url;
+        publicId = result.public_id;
+      }
+
+      if (!logoUrl || !publicId) {
+        throw new Error("Please select a logo");
+      }
+
+      const method = editingCarBrand ? "PUT" : "POST";
+      const body = editingCarBrand
+        ? { ...carBrandForm, logo: logoUrl, cloudinaryPublicId: publicId, _id: editingCarBrand._id }
+        : { ...carBrandForm, logo: logoUrl, cloudinaryPublicId: publicId };
+
+      const response = await fetch("/api/car-brands", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage(editingCarBrand ? "✅ Brand updated!" : "✅ Brand added!");
+        setShowCarBrandForm(false);
+        setEditingCarBrand(null);
+        setCarBrandForm({ name: "", logo: "", cloudinaryPublicId: "" });
+        setPreview(null);
+        await fetchData();
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        throw new Error(data.error || "Failed to save brand");
+      }
+    } catch (error) {
+      setMessage("❌ Failed to save brand: " + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // NEW: Delete Car Brand Handler
+  const handleDeleteCarBrand = async (id) => {
+    if (!confirm("Delete this brand?")) return;
+    try {
+      const response = await fetch(`/api/car-brands?id=${id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (data.success) {
+        setMessage("✅ Brand deleted!");
+        await fetchData();
+        setTimeout(() => setMessage(""), 3000);
+      }
+    } catch (error) {
+      setMessage("❌ Failed to delete brand: " + error.message);
+    }
+  };
+
+  // Car Model Submit Handler
+  const handleCarModelSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setUploading(true);
+
+    try {
+      const fileInput = document.querySelector('input[name="carModelImage"]');
+      const file = fileInput?.files[0];
+
+      let imageUrl = carModelForm.image;
+      let publicId = carModelForm.cloudinaryPublicId;
+
+      // Upload image if new file selected
+      if (file) {
+        const signatureRes = await fetch(`/api/upload-signature?folder=automotive-carcare/car-models`);
+        const signatureData = await signatureRes.json();
+
+        if (signatureData.error) throw new Error(signatureData.error);
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("timestamp", signatureData.timestamp);
+        formData.append("signature", signatureData.signature);
+        formData.append("api_key", signatureData.apiKey);
+        formData.append("folder", signatureData.folder);
+
+        const cloudinaryRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/image/upload`,
+          { method: "POST", body: formData }
+        );
+
+        const result = await cloudinaryRes.json();
+        if (result.error) throw new Error(result.error.message);
+
+        imageUrl = result.secure_url;
+        publicId = result.public_id;
+      }
+
+      if (!imageUrl || !publicId) {
+        throw new Error("Please select an image");
+      }
+
+      const method = editingCarModel ? "PUT" : "POST";
+      const body = editingCarModel
+        ? { ...carModelForm, image: imageUrl, cloudinaryPublicId: publicId, _id: editingCarModel._id }
+        : { ...carModelForm, image: imageUrl, cloudinaryPublicId: publicId };
+
+      const response = await fetch("/api/car-models", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setMessage(editingCarModel ? "✅ Car model updated!" : "✅ Car model added!");
+        setShowCarModelForm(false);
+        setEditingCarModel(null);
+        setCarModelForm({ brand: "", name: "", image: "", cloudinaryPublicId: "", serviceCount: 6 });
+        setPreview(null);
+        await fetchData();
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        throw new Error(data.error || "Failed to save car model");
+      }
+    } catch (error) {
+      setMessage("❌ Failed to save car model: " + error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Delete Car Model Handler
+  const handleDeleteCarModel = async (id) => {
+    if (!confirm("Delete this car model?")) return;
+    try {
+      const response = await fetch(`/api/car-models?id=${id}`, { method: "DELETE" });
+      const data = await response.json();
+      if (data.success) {
+        setMessage("✅ Car model deleted!");
+        await fetchData();
+        setTimeout(() => setMessage(""), 3000);
+      }
+    } catch (error) {
+      setMessage("❌ Failed to delete car model: " + error.message);
+    }
+  };
+
   const handleAcceptBooking = async (booking) => {
     if (!confirm(`Accept booking from ${booking.name}?`)) return;
 
@@ -288,7 +508,23 @@ export default function AdminDashboard() {
     return grouped;
   };
 
-  if (loading && !["services", "vehicle-brands"].includes(activeTab)) {
+  const formatServicesDisplay = (booking) => {
+    const services = [];
+    
+    if (booking.serviceName) {
+      services.push(booking.serviceName);
+    }
+    
+    if (booking.additionalServices && booking.additionalServices.length > 0) {
+      booking.additionalServices.forEach(service => {
+        services.push(service.name);
+      });
+    }
+    
+    return services;
+  };
+
+  if (loading && !["services", "vehicle-brands", "car-brands", "car-models"].includes(activeTab)) {
     return (
       <div className="loading-container">
         <div className="loading-content">
@@ -309,6 +545,8 @@ export default function AdminDashboard() {
     { id: "bookings", label: "Bookings", count: bookings.length },
     { id: "services", label: "Services", count: services.length },
     { id: "vehicle-brands", label: "Vehicle Brands", count: vehicleBrands.length },
+    { id: "car-brands", label: "Car Brands", count: carBrands.length }, // NEW
+    { id: "car-models", label: "Car Models", count: carModels.length },
     { id: "hero-images", label: "Hero Images", count: heroImages.length },
   ];
 
@@ -383,50 +621,73 @@ export default function AdminDashboard() {
                         <span className="date-count">{dateBookings.length} booking{dateBookings.length > 1 ? "s" : ""}</span>
                       </div>
                       <div className="space-y-4">
-                        {dateBookings.map((booking) => (
-                          <div key={booking._id} className="booking-card">
-                            <div className="booking-grid">
-                              <div>
-                                <p className="booking-label">Customer</p>
-                                <p className="booking-value">{booking.name}</p>
-                                <p className="text-gray text-sm mt-2">{booking.email}</p>
-                                <p className="text-gray text-sm">{booking.phone}</p>
-                              </div>
-                              <div>
-                                <p className="booking-label">Service Details</p>
-                                <p className="booking-value">{booking.serviceName || booking.service}</p>
-                                {/* {booking.servicePrice && <p className="text-sm" style={{color: 'rgb(96, 165, 250)'}}>₹{booking.servicePrice}</p>} */}
-                                <p className="text-sm text-gray mt-2">Brand: {booking.vehicleBrand || "N/A"}</p>
-                                <p className="text-sm text-gray">Model: {booking.vehicleModel || "N/A"}</p>
-                                <p className="text-sm text-gray">Time: {booking.bookingTime}</p>
-                              </div>
-                              <div>
-                                <p className="booking-label">Status</p>
-                                <span className={`status-badge ${booking.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}`}>
-                                  {booking.status === 'confirmed' ? '✓ Confirmed' : '⏳ Pending'}
-                                </span>
-                                <div className="space-y-2 mt-4">
-                                  {booking.status === 'pending' && (
-                                    <button onClick={() => handleAcceptBooking(booking)} className="btn-accept">
-                                      <SVG path="M5 13l4 4L19 7" className="icon-sm" />
-                                      Accept
-                                    </button>
-                                  )}
-                                  <button onClick={() => handleDeleteBooking(booking)} className="btn-delete" style={{width: '100%'}}>
-                                    <SVG path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="icon-sm" />
-                                    Delete
-                                  </button>
+                        {dateBookings.map((booking) => {
+                          const bookingServices = formatServicesDisplay(booking);
+                          
+                          return (
+                            <div key={booking._id} className="booking-card">
+                              <div className="booking-grid">
+                                <div>
+                                  <p className="booking-label">Customer</p>
+                                  <p className="booking-value">{booking.name}</p>
+                                  <p className="text-gray text-sm mt-2">{booking.email}</p>
+                                  <p className="text-gray text-sm">{booking.phone}</p>
                                 </div>
-                                {booking.notes && (
-                                  <div className="mt-2">
-                                    <p className="text-xs text-gray">Notes:</p>
-                                    <p className="text-sm text-gray">{booking.notes}</p>
+                                <div>
+                                  <p className="booking-label">Service Details</p>
+                                  {bookingServices.length > 0 ? (
+                                    <div className="mb-2">
+                                      {bookingServices.length === 1 ? (
+                                        <p className="booking-value">{bookingServices[0]}</p>
+                                      ) : (
+                                        <>
+                                          <p className="text-sm font-semibold mb-1" style={{color: 'rgb(147, 197, 253)'}}>
+                                            {bookingServices.length} Services Selected
+                                          </p>
+                                          <div className="badge-grid">
+                                            {bookingServices.map((service, idx) => (
+                                              <span key={idx} className="badge" style={{fontSize: '0.75rem', padding: '0.25rem 0.5rem'}}>
+                                                {service}
+                                              </span>
+                                            ))}
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <p className="booking-value text-gray">No service selected</p>
+                                  )}
+                                  <p className="text-sm text-gray mt-2">Vehicle: {booking.vehicleBrand} {booking.vehicleModel}</p>
+                                  <p className="text-sm text-gray">Time: {booking.bookingTime}</p>
+                                </div>
+                                <div>
+                                  <p className="booking-label">Status</p>
+                                  <span className={`status-badge ${booking.status === 'confirmed' ? 'status-confirmed' : 'status-pending'}`}>
+                                    {booking.status === 'confirmed' ? '✓ Confirmed' : '⏳ Pending'}
+                                  </span>
+                                  <div className="space-y-2 mt-4">
+                                    {booking.status === 'pending' && (
+                                      <button onClick={() => handleAcceptBooking(booking)} className="btn-accept">
+                                        <SVG path="M5 13l4 4L19 7" className="icon-sm" />
+                                        Accept
+                                      </button>
+                                    )}
+                                    <button onClick={() => handleDeleteBooking(booking)} className="btn-delete" style={{width: '100%'}}>
+                                      <SVG path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" className="icon-sm" />
+                                      Delete
+                                    </button>
                                   </div>
-                                )}
+                                  {booking.notes && (
+                                    <div className="mt-3 p-2" style={{background: 'rgba(59, 130, 246, 0.1)', borderRadius: '0.375rem', borderLeft: '3px solid rgb(59, 130, 246)'}}>
+                                      <p className="text-xs text-gray mb-1">📝 Notes:</p>
+                                      <p className="text-sm text-gray">{booking.notes}</p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
@@ -457,32 +718,17 @@ export default function AdminDashboard() {
               <div className="form-card">
                 <h3 className="form-title">{editingService ? "Edit Service" : "Add Service"}</h3>
                 <form onSubmit={handleServiceSubmit}>
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label className="form-label">Service Name *</label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={serviceForm.name}
-                        onChange={(e) => setServiceForm({ ...serviceForm, [e.target.name]: e.target.value })}
-                        required
-                        placeholder="Premium Car Wash"
-                        className="form-input"
-                      />
-                    </div>
-                    {/* <div className="form-group">
-                      <label className="form-label">Price (₹) *</label>
-                      <input
-                        type="number"
-                        name="price"
-                        value={serviceForm.price}
-                        onChange={(e) => setServiceForm({ ...serviceForm, [e.target.name]: e.target.value })}
-                        required
-                        placeholder="499"
-                        min="0"
-                        className="form-input"
-                      />
-                    </div> */}
+                  <div className="form-group">
+                    <label className="form-label">Service Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={serviceForm.name}
+                      onChange={(e) => setServiceForm({ ...serviceForm, [e.target.name]: e.target.value })}
+                      required
+                      placeholder="Premium Car Wash"
+                      className="form-input"
+                    />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Description *</label>
@@ -530,7 +776,6 @@ export default function AdminDashboard() {
                   <div key={service._id} className="card">
                     <div className="card-header">
                       <h3 className="card-title">{service.name}</h3>
-                      {/* <span style={{fontSize: '1.5rem', fontWeight: 'bold', color: 'rgb(59, 130, 246)'}}>₹{service.price}</span> */}
                     </div>
                     <p className="card-subtitle">Slug: {service.slug}</p>
                     <p className="text-gray text-sm mb-4">{service.description}</p>
@@ -655,31 +900,296 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* ============================================ */}
+        {/* NEW: CAR BRANDS TAB - COMPLETE SECTION */}
+        {/* ============================================ */}
+        {activeTab === "car-brands" && (
+          <div>
+            <div className="section-header">
+              <div>
+                <h2 className="section-title">🏢 Car Brands</h2>
+                <p className="section-subtitle">Manage car brands with logos for brand pages</p>
+              </div>
+              <button onClick={() => {
+                setShowCarBrandForm(true);
+                setEditingCarBrand(null);
+                setCarBrandForm({ name: "", logo: "", cloudinaryPublicId: "" });
+                setPreview(null);
+              }} className="btn-primary">
+                <SVG path="M12 4v16m8-8H4" className="icon-sm" />
+                Add Brand
+              </button>
+            </div>
+
+            {showCarBrandForm && (
+              <div className="form-card">
+                <h3 className="form-title">{editingCarBrand ? "Edit Brand" : "Add Brand"}</h3>
+                <form onSubmit={handleCarBrandSubmit}>
+                  <div className="form-group">
+                    <label className="form-label">Brand Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={carBrandForm.name}
+                      onChange={(e) => setCarBrandForm({ ...carBrandForm, [e.target.name]: e.target.value })}
+                      required
+                      placeholder="Toyota"
+                      className="form-input"
+                    />
+                    <p className="text-xs text-gray mt-1">💡 Enter exact brand name (e.g., "Toyota", "Mahindra")</p>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Brand Logo * {editingCarBrand && "(Upload new to replace)"}</label>
+                    <input
+                      type="file"
+                      name="carBrandLogo"
+                      accept="image/*"
+                      onChange={handleCarBrandLogoChange}
+                      className="form-input"
+                      style={{padding: '0.5rem'}}
+                      required={!editingCarBrand}
+                    />
+                    {preview && (
+                      <img src={preview} alt="Preview" style={{width: '10rem', height: '10rem', objectFit: 'contain', borderRadius: '0.5rem', marginTop: '1rem', background: '#f3f4f6'}} />
+                    )}
+                    {editingCarBrand && !preview && carBrandForm.logo && (
+                      <img src={carBrandForm.logo} alt="Current" style={{width: '10rem', height: '10rem', objectFit: 'contain', borderRadius: '0.5rem', marginTop: '1rem', background: '#f3f4f6'}} />
+                    )}
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" disabled={uploading} className="btn-primary" style={{flex: 1}}>
+                      {uploading ? "Saving..." : (editingCarBrand ? "Update Brand" : "Add Brand")}
+                    </button>
+                    <button type="button" onClick={() => { 
+                      setShowCarBrandForm(false); 
+                      setEditingCarBrand(null); 
+                      setPreview(null);
+                    }} className="btn-cancel">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {carBrands.length === 0 ? (
+              <div className="empty-state">
+                <SVG path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" className="empty-icon" />
+                <p className="empty-text">No car brands added yet</p>
+                <p className="text-sm text-gray mt-2">Click "Add Brand" to get started</p>
+              </div>
+            ) : (
+              <div className="card-grid">
+                {carBrands.map((brand) => (
+                  <div key={brand._id} className="card">
+                    <img 
+                      src={brand.logo} 
+                      alt={brand.name} 
+                      style={{
+                        width: '100%', 
+                        height: '10rem', 
+                        objectFit: 'contain', 
+                        borderRadius: '0.5rem', 
+                        marginBottom: '1rem', 
+                        background: '#f3f4f6'
+                      }} 
+                    />
+                    <div className="card-header">
+                      <h3 className="card-title">{brand.name}</h3>
+                    </div>
+                    <p className="text-sm text-gray mb-4">Slug: {brand.brandSlug}</p>
+                    <div className="card-actions">
+                      <button onClick={() => { 
+                        setEditingCarBrand(brand); 
+                        setCarBrandForm(brand); 
+                        setShowCarBrandForm(true);
+                        setPreview(null);
+                      }} className="btn-edit">
+                        Edit
+                      </button>
+                      <button onClick={() => handleDeleteCarBrand(brand._id)} className="btn-delete">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ============================================ */}
+        {/* CAR MODELS TAB */}
+        {/* ============================================ */}
+        {activeTab === "car-models" && (
+          <div>
+            <div className="section-header">
+              <div>
+                <h2 className="section-title">🚗 Car Models</h2>
+                <p className="section-subtitle">Manage car models with images for brand pages</p>
+              </div>
+              <button onClick={() => {
+                setShowCarModelForm(true);
+                setEditingCarModel(null);
+                setCarModelForm({ brand: "", name: "", image: "", cloudinaryPublicId: "", serviceCount: 6 });
+                setPreview(null);
+              }} className="btn-primary">
+                <SVG path="M12 4v16m8-8H4" className="icon-sm" />
+                Add Car Model
+              </button>
+            </div>
+
+            {showCarModelForm && (
+              <div className="form-card">
+                <h3 className="form-title">{editingCarModel ? "Edit Car Model" : "Add Car Model"}</h3>
+                <form onSubmit={handleCarModelSubmit}>
+                  <div className="form-group">
+                    <label className="form-label">Brand Name *</label>
+                    <input
+                      type="text"
+                      name="brand"
+                      value={carModelForm.brand}
+                      onChange={(e) => setCarModelForm({ ...carModelForm, [e.target.name]: e.target.value })}
+                      required
+                      placeholder="Toyota"
+                      className="form-input"
+                    />
+                    <p className="text-xs text-gray mt-1">💡 Must match brand name exactly (e.g., "Toyota", "Mahindra")</p>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Model Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={carModelForm.name}
+                      onChange={(e) => setCarModelForm({ ...carModelForm, [e.target.name]: e.target.value })}
+                      required
+                      placeholder="Fortuner"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Service Count</label>
+                    <input
+                      type="number"
+                      name="serviceCount"
+                      value={carModelForm.serviceCount}
+                      onChange={(e) => setCarModelForm({ ...carModelForm, [e.target.name]: parseInt(e.target.value) })}
+                      min="1"
+                      className="form-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Model Image * {editingCarModel && "(Upload new to replace)"}</label>
+                    <input
+                      type="file"
+                      name="carModelImage"
+                      accept="image/*"
+                      onChange={handleCarModelImageChange}
+                      className="form-input"
+                      style={{padding: '0.5rem'}}
+                      required={!editingCarModel}
+                    />
+                    {preview && (
+                      <img src={preview} alt="Preview" style={{width: '16rem', height: '10rem', objectFit: 'contain', borderRadius: '0.5rem', marginTop: '1rem', background: '#f3f4f6'}} />
+                    )}
+                    {editingCarModel && !preview && carModelForm.image && (
+                      <img src={carModelForm.image} alt="Current" style={{width: '16rem', height: '10rem', objectFit: 'contain', borderRadius: '0.5rem', marginTop: '1rem', background: '#f3f4f6'}} />
+                    )}
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" disabled={uploading} className="btn-primary" style={{flex: 1}}>
+                      {uploading ? "Saving..." : (editingCarModel ? "Update Model" : "Add Model")}
+                    </button>
+                    <button type="button" onClick={() => { 
+                      setShowCarModelForm(false); 
+                      setEditingCarModel(null); 
+                      setPreview(null);
+                    }} className="btn-cancel">
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {carModels.length === 0 ? (
+              <div className="empty-state">
+                <SVG path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" className="empty-icon" />
+                <p className="empty-text">No car models added yet</p>
+                <p className="text-sm text-gray mt-2">Click "Add Car Model" to get started</p>
+              </div>
+            ) : (
+              <div className="card-grid">
+                {carModels.map((model) => (
+                  <div key={model._id} className="card">
+                    <img 
+                      src={model.image} 
+                      alt={model.name} 
+                      style={{
+                        width: '100%', 
+                        height: '10rem', 
+                        objectFit: 'contain', 
+                        borderRadius: '0.5rem', 
+                        marginBottom: '1rem', 
+                        background: '#f3f4f6'
+                      }} 
+                    />
+                    <div className="card-header">
+                      <h3 className="card-title">{model.name}</h3>
+                    </div>
+                    <p className="card-subtitle">🏢 {model.brand}</p>
+                    <p className="text-sm text-gray mb-2">Slug: {model.slug}</p>
+                    <p className="text-sm text-gray mb-4">📋 {model.serviceCount} Services</p>
+                    <div className="card-actions">
+                      <button onClick={() => { 
+                        setEditingCarModel(model); 
+                        setCarModelForm(model); 
+                        setShowCarModelForm(true);
+                        setPreview(null);
+                      }} className="btn-edit">
+                        Edit
+                      </button>
+                      <button onClick={() => handleDeleteCarModel(model._id)} className="btn-delete">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* HERO IMAGES TAB */}
         {activeTab === "hero-images" && (
           <div>
             <div className="section-header">
               <div>
                 <h2 className="section-title">Hero Images</h2>
-                <p className="section-subtitle">Upload and manage hero section images</p>
+                <p className="section-subtitle">Manage homepage hero carousel images</p>
               </div>
             </div>
 
             <div className="form-card">
-              <h3 className="form-title">Upload New Image</h3>
+              <h3 className="form-title">Upload New Hero Image</h3>
               <form onSubmit={handleImageUpload}>
-                <input
-                  type="file"
-                  name="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="form-input mb-4"
-                  style={{padding: '0.5rem'}}
-                />
-                {preview && (
-                  <img src={preview} alt="Preview" style={{width: '16rem', height: '10rem', objectFit: 'cover', borderRadius: '0.5rem', marginBottom: '1rem'}} />
-                )}
-                <button type="submit" disabled={uploading} className="btn-primary">
+                <div className="form-group">
+                  <label className="form-label">Select Image *</label>
+                  <input
+                    type="file"
+                    name="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    required
+                    className="form-input"
+                    style={{padding: '0.5rem'}}
+                  />
+                  {preview && (
+                    <img src={preview} alt="Preview" style={{width: '100%', maxWidth: '20rem', height: 'auto', borderRadius: '0.5rem', marginTop: '1rem'}} />
+                  )}
+                </div>
+                <button type="submit" disabled={uploading} className="btn-primary" style={{width: '100%'}}>
                   {uploading ? "Uploading..." : "Upload Image"}
                 </button>
               </form>
@@ -688,13 +1198,25 @@ export default function AdminDashboard() {
             {heroImages.length === 0 ? (
               <div className="empty-state">
                 <SVG path="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" className="empty-icon" />
-                <p className="empty-text">No images uploaded</p>
+                <p className="empty-text">No hero images uploaded</p>
               </div>
             ) : (
               <div className="card-grid">
                 {heroImages.map((image) => (
                   <div key={image.public_id} className="card">
-                    <img src={image.url} alt="Hero" style={{width: '100%', height: '12rem', objectFit: 'cover', borderRadius: '0.5rem', marginBottom: '1rem'}} />
+                    <img 
+                      src={image.secure_url} 
+                      alt="Hero" 
+                      style={{
+                        width: '100%', 
+                        height: '12rem', 
+                        objectFit: 'cover', 
+                        borderRadius: '0.5rem', 
+                        marginBottom: '1rem'
+                      }} 
+                    />
+                    <p className="text-xs text-gray mb-2 truncate">ID: {image.public_id}</p>
+                    <p className="text-xs text-gray mb-4">Size: {(image.bytes / 1024).toFixed(2)} KB</p>
                     <button onClick={() => handleDeleteImage(image.public_id)} className="btn-delete" style={{width: '100%'}}>
                       Delete
                     </button>
